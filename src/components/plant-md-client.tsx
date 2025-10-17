@@ -63,37 +63,41 @@ export function PlantMDClient() {
   const handleImageUpload = async (file: File) => {
     setIsLoading(true);
     setCurrentDiagnosisId(null); 
-    const imageUrl = URL.createObjectURL(file);
-
-    try {
-      // Mock disease detection
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const disease = MOCKED_DISEASES[Math.floor(Math.random() * MOCKED_DISEASES.length)];
-      const confidence = Math.random() * (0.98 - 0.75) + 0.75;
-
-      const { remedyTips } = await generateRemedyTips({ disease });
-
-      const newDiagnosis: Diagnosis = {
-        id: `diag-${Date.now()}`,
-        image: imageUrl,
-        disease,
-        confidence,
-        remedyTips,
-        timestamp: Date.now(),
-      };
-
-      setDiagnoses(prev => [newDiagnosis, ...prev]);
-      setCurrentDiagnosisId(newDiagnosis.id);
-    } catch (error) {
-      console.error('Diagnosis failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Diagnosis Failed',
-        description: 'Could not analyze the plant image. Please try again.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+        const imageUrl = reader.result as string;
+        
+        try {
+          // Mock disease detection
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          const disease = MOCKED_DISEASES[Math.floor(Math.random() * MOCKED_DISEASES.length)];
+          const confidence = Math.random() * (0.98 - 0.75) + 0.75;
+    
+          const { remedyTips } = await generateRemedyTips({ disease });
+    
+          const newDiagnosis: Diagnosis = {
+            id: `diag-${Date.now()}`,
+            image: imageUrl,
+            disease,
+            confidence,
+            remedyTips,
+            timestamp: Date.now(),
+          };
+    
+          setDiagnoses(prev => [newDiagnosis, ...prev]);
+          setCurrentDiagnosisId(newDiagnosis.id);
+        } catch (error) {
+          console.error('Diagnosis failed:', error);
+          toast({
+            variant: 'destructive',
+            title: 'Diagnosis Failed',
+            description: 'Could not analyze the plant image. Please try again.',
+          });
+        } finally {
+          setIsLoading(false);
+        }
+    };
   };
 
   const handleSelectDiagnosis = (id: string) => {
@@ -113,7 +117,7 @@ export function PlantMDClient() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full flex-col">
+      <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col">
         <div className="flex flex-1">
           <DiagnosisHistory
             diagnoses={diagnoses}
@@ -123,7 +127,7 @@ export function PlantMDClient() {
             isLoading={isHistoryLoading}
           />
           <SidebarInset className="flex-1">
-            <main className="flex h-full flex-col items-center justify-center p-4 md:p-8">
+            <div className="flex h-full flex-col items-center justify-center p-4 md:p-8">
               {isLoading ? (
                 <div className="w-full max-w-4xl space-y-8">
                   <Skeleton className="aspect-video w-full rounded-xl" />
@@ -138,7 +142,7 @@ export function PlantMDClient() {
               ) : (
                 <ImageUploader onImageUpload={handleImageUpload} />
               )}
-            </main>
+            </div>
           </SidebarInset>
         </div>
       </div>

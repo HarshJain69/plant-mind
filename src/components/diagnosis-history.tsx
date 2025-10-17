@@ -36,10 +36,6 @@ export function DiagnosisHistory({
   return (
     <Sidebar>
       <SidebarHeader className="border-b">
-        <div className="flex items-center gap-2 p-2">
-            <Leaf className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">PlantMD</h1>
-        </div>
         <div className="p-2">
             <Button variant="default" className="w-full" onClick={onNewDiagnosis}>
                 <PlusCircle />
