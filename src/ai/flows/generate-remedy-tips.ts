@@ -1,3 +1,4 @@
+
 // This file is machine-generated - edit with caution!
 'use server';
 /**
@@ -29,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'generateRemedyTipsPrompt',
   input: {schema: GenerateRemedyTipsInputSchema},
   output: {schema: GenerateRemedyTipsOutputSchema},
-  prompt: `You are an expert in plant diseases and their remedies. Provide detailed and practical remedies and prevention tips for the following plant disease: {{{disease}}}.',
+  prompt: `You are an expert in plant diseases and their remedies. Provide detailed and practical remedies and prevention tips for the following plant disease: {{{disease}}}.`,
 });
 
 const generateRemedyTipsFlow = ai.defineFlow(
