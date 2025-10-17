@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "sample-plant-1",
+      "description": "A healthy looking plant to be used as a sample in diagnosis history.",
+      "imageUrl": "https://picsum.photos/seed/plant1/800/600",
+      "imageHint": "healthy plant"
+    },
+    {
+      "id": "sample-plant-2",
+      "description": "A plant leaf that might have some disease.",
+      "imageUrl": "https://picsum.photos/seed/plant2/800/600",
+      "imageHint": "plant disease"
+    }
+  ]
 }
