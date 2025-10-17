@@ -14,18 +14,15 @@ interface DiagnosisResultProps {
 }
 
 export function DiagnosisResult({ diagnosis }: DiagnosisResultProps) {
-  const formattedTips = diagnosis.remedyTips.split('\n').map((line, index) => {
-    if (line.startsWith('- ') || line.startsWith('* ')) {
-      return (
-        <li key={index} className="ml-4 list-disc">
-          {line.substring(2)}
-        </li>
-      );
+  const formattedTips = diagnosis.remedyTips.split('\n').filter(line => line.trim() !== '').map((line, index) => {
+    const trimmedLine = line.trim();
+    if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+      return <h4 key={index} className="font-bold text-foreground mt-4 text-base">{trimmedLine.substring(2, trimmedLine.length - 2)}</h4>;
     }
-    if (line.trim() === '') {
-        return <br key={index} />;
+    if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+      return <li key={index} className="ml-4 list-disc text-muted-foreground">{trimmedLine.substring(2)}</li>;
     }
-    return <p key={index}>{line}</p>;
+    return <p key={index} className="text-muted-foreground">{trimmedLine}</p>;
   });
 
 
@@ -71,7 +68,7 @@ export function DiagnosisResult({ diagnosis }: DiagnosisResultProps) {
                   <span>Remedy & Prevention</span>
                 </div>
                 <div className="prose prose-sm max-w-none text-muted-foreground space-y-2">
-                    {formattedTips}
+                    <ul className="space-y-1">{formattedTips}</ul>
                 </div>
               </div>
 

@@ -30,7 +30,9 @@ const prompt = ai.definePrompt({
   name: 'generateRemedyTipsPrompt',
   input: {schema: GenerateRemedyTipsInputSchema},
   output: {schema: GenerateRemedyTipsOutputSchema},
-  prompt: `You are an expert in plant diseases and their remedies. Provide detailed and practical remedies and prevention tips for the following plant disease: {{{disease}}}.`,
+  prompt: `You are an expert in plant diseases and their remedies. Provide detailed and practical remedies and prevention tips for the following plant disease: {{{disease}}}.
+
+Format your response using Markdown. Use bold headings for sections like "**Remedies**" and "**Prevention**". Use bullet points for individual tips.`,
 });
 
 const generateRemedyTipsFlow = ai.defineFlow(
