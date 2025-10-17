@@ -55,8 +55,51 @@ interface PlantCollection {
   diagnosisCount: number;
 }
 
+interface Diagnosis {
+  id: string;
+  disease: string;
+  confidence: number;
+  timestamp: number;
+  image: string;
+}
+
+// Helper functions moved outside component to avoid hoisting issues
+const calculateStreak = (diagnoses: Diagnosis[]) => {
+  // Calculate current streak of consecutive days with diagnoses
+  let streak = 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let i = 0; i < 365; i++) {
+    const checkDate = new Date(today);
+    checkDate.setDate(checkDate.getDate() - i);
+    
+    const hasActivity = diagnoses.some((d: Diagnosis) => {
+      const diagnosisDate = new Date(d.timestamp);
+      diagnosisDate.setHours(0, 0, 0, 0);
+      return diagnosisDate.getTime() === checkDate.getTime();
+    });
+    
+    if (hasActivity) {
+      streak++;
+    } else if (i > 0) { // Don't break on the first day if no activity today
+      break;
+    }
+  }
+  
+  return streak;
+};
+
+const calculateLevel = (totalDiagnoses: number) => {
+  if (totalDiagnoses >= 100) return { level: 5, name: 'Plant Expert', next: null };
+  if (totalDiagnoses >= 50) return { level: 4, name: 'Plant Specialist', next: 100 };
+  if (totalDiagnoses >= 20) return { level: 3, name: 'Plant Enthusiast', next: 50 };
+  if (totalDiagnoses >= 5) return { level: 2, name: 'Plant Lover', next: 20 };
+  return { level: 1, name: 'Plant Beginner', next: 5 };
+};
+
 export default function ProfilePage() {
-  const [diagnoses, setDiagnoses] = useState([]);
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
@@ -73,17 +116,17 @@ export default function ProfilePage() {
 
   const userStats = useMemo(() => {
     const totalDiagnoses = diagnoses.length;
-    const healthyPlants = diagnoses.filter(d => d.disease === 'Healthy').length;
+    const healthyPlants = diagnoses.filter((d: Diagnosis) => d.disease === 'Healthy').length;
     const problemsFound = totalDiagnoses - healthyPlants;
     const avgConfidence = diagnoses.length > 0 
-      ? (diagnoses.reduce((sum, d) => sum + d.confidence, 0) / diagnoses.length * 100)
+      ? (diagnoses.reduce((sum: number, d: Diagnosis) => sum + d.confidence, 0) / diagnoses.length * 100)
       : 0;
     
-    const thisWeek = diagnoses.filter(d => 
+    const thisWeek = diagnoses.filter((d: Diagnosis) => 
       Date.now() - d.timestamp < 7 * 24 * 60 * 60 * 1000
     ).length;
     
-    const thisMonth = diagnoses.filter(d => 
+    const thisMonth = diagnoses.filter((d: Diagnosis) => 
       Date.now() - d.timestamp < 30 * 24 * 60 * 60 * 1000
     ).length;
 
@@ -102,41 +145,7 @@ export default function ProfilePage() {
     };
   }, [diagnoses]);
 
-  const calculateStreak = (diagnoses) => {
-    // Calculate current streak of consecutive days with diagnoses
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (let i = 0; i < 365; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(checkDate.getDate() - i);
-      
-      const hasActivity = diagnoses.some(d => {
-        const diagnosisDate = new Date(d.timestamp);
-        diagnosisDate.setHours(0, 0, 0, 0);
-        return diagnosisDate.getTime() === checkDate.getTime();
-      });
-      
-      if (hasActivity) {
-        streak++;
-      } else if (i > 0) { // Don't break on the first day if no activity today
-        break;
-      }
-    }
-    
-    return streak;
-  };
-
-  const calculateLevel = (totalDiagnoses) => {
-    if (totalDiagnoses >= 100) return { level: 5, name: 'Plant Expert', next: null };
-    if (totalDiagnoses >= 50) return { level: 4, name: 'Plant Specialist', next: 100 };
-    if (totalDiagnoses >= 20) return { level: 3, name: 'Plant Enthusiast', next: 50 };
-    if (totalDiagnoses >= 5) return { level: 2, name: 'Plant Lover', next: 20 };
-    return { level: 1, name: 'Plant Beginner', next: 5 };
-  };
-
-  const achievements: Achievement[] = [
+  const achievements: Achievement[] = useMemo(() => [
     {
       id: 'first-diagnosis',
       name: 'First Steps',
@@ -190,13 +199,13 @@ export default function ProfilePage() {
       progress: Math.min(userStats.avgConfidence, 95),
       maxProgress: 95
     }
-  ];
+  ], [diagnoses, userStats]);
 
   const plantCollection: PlantCollection[] = useMemo(() => {
     // Group diagnoses by similar plants and create a collection
-    const plantMap = new Map();
+    const plantMap = new Map<string, PlantCollection>();
     
-    diagnoses.forEach(diagnosis => {
+    diagnoses.forEach((diagnosis: Diagnosis) => {
       const key = diagnosis.disease === 'Healthy' ? 'healthy-plant' : diagnosis.disease;
       if (!plantMap.has(key)) {
         plantMap.set(key, {
